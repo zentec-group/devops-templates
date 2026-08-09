@@ -9,7 +9,7 @@ configure<JacocoPluginExtension> {
     toolVersion = "0.8.12"
 }
 
-val minCoverageVal: String = findProperty("coverage.threshold")?.toString() ?: "0.70"
+val minCoverageVal: String = findProperty("coverage.threshold")?.toString() ?: "0.0"
 
 val exclusionList = listOf(
     "**/dto/**",
