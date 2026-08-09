@@ -1,24 +1,30 @@
+import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification
+import org.gradle.api.tasks.testing.Test
 
-plugins {
-    jacoco
-}
+apply(plugin = "jacoco")
 
-jacoco {
+configure<JacocoPluginExtension> {
     toolVersion = "0.8.12"
 }
 
-val minCoverage: String = (project.findProperty("coverage.threshold") as? String) ?: "0.70"
+val minCoverageVal: String = findProperty("coverage.threshold")?.toString() ?: "0.70"
 
 val exclusionList = listOf(
     "**/dto/**",
     "**/model/**",
+    "**/models/**",
     "**/entity/**",
+    "**/entities/**",
     "**/config/**",
     "**/exception/**",
+    "**/exceptions/**",
     "**/constant/**",
+    "**/constants/**",
     "**/enum/**",
+    "**/enums/**",
+    "**/support/**",
     "**/interceptor/**",
     "**/migration/**",
     "**/seeder/**",
@@ -26,7 +32,7 @@ val exclusionList = listOf(
 )
 
 tasks.named<JacocoReport>("jacocoTestReport") {
-    dependsOn(tasks.test)
+    dependsOn(tasks.named("test"))
     reports {
         xml.required.set(true)
         html.required.set(true)
@@ -42,13 +48,6 @@ tasks.named<JacocoReport>("jacocoTestReport") {
 
 tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     dependsOn(tasks.named("jacocoTestReport"))
-    violationRules {
-        rule {
-            limit {
-                minimum = minCoverage.toBigDecimal()
-            }
-        }
-    }
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
@@ -56,8 +55,18 @@ tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             }
         })
     )
+    violationRules {
+        rule {
+            element = "BUNDLE"
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = minCoverageVal.toBigDecimal()
+            }
+        }
+    }
 }
 
-tasks.test {
+tasks.withType<Test> {
     finalizedBy(tasks.named("jacocoTestReport"))
 }

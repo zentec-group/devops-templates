@@ -1,14 +1,13 @@
-val gprUser: String = project.findProperty("gpr.user") as String? ?: System.getenv("GPR_USER") ?: "github-actions"
-val gprToken: String = project.findProperty("gpr.token") as String? ?: System.getenv("GPR_TOKEN") ?: ""
+val zentecUser: String = (project.findProperty("zentec.gpr.user") ?: System.getenv("ZENTEC_GPR_USER") ?: project.findProperty("gpr.user") ?: System.getenv("GPR_USER") ?: "github-actions") as String
+val zentecToken: String = (project.findProperty("zentec.gpr.token") ?: System.getenv("ZENTEC_GPR_TOKEN") ?: project.findProperty("gpr.token") ?: System.getenv("GPR_TOKEN") ?: "") as String
 
 repositories {
     mavenCentral()
     maven {
-        name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/zentec-group/engine_schema")
         credentials {
-            username = gprUser
-            password = gprToken
+            username = zentecUser
+            password = zentecToken
         }
     }
 }
