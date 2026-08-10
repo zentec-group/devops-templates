@@ -32,7 +32,17 @@
         "publishCmd": "./gradlew publish -Pversion=${nextRelease.version}"
       }
     ],
-    "@semantic-release/github",
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "build/libs/*.jar",
+            "label": "Compiled JAR Binary"
+          }
+        ]
+      }
+    ],
     [
       "@semantic-release/git",
       {

@@ -64,6 +64,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: pr-title
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -150,32 +154,6 @@ jobs:
           Repository: GitHub Packages (\`zentec-group\`)"
 
   # =========================================================================
-  # JOB: Release Title Reminder for PRs targeting main
-  # =========================================================================
-  main-title-reminder:
-    name: Main Branch Release Title Reminder
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Comment Release Title Reminder on Main PR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_NUM="${{ github.event.pull_request.number }}"
-          REPO="${{ github.repository }}"
-          gh pr comment "$PR_NUM" --repo "$REPO" --body "**Important Notice for Main Branch Release**
-
-          When performing a **Squash and Merge** into \`main\`, the **title of this Pull Request** determines the official release version published to GitHub Packages:
-
-          - \`fix: description\` -> **PATCH** release (\`0.0.1\`, \`0.0.2\`)
-          - \`feat: description\` -> **MINOR** release (\`0.1.0\`, \`0.2.0\`)
-          - \`feat: description\` with \`BREAKING CHANGE:\` -> **MAJOR** release (\`1.0.0\`, \`2.0.0\`)
-
-          Ensure that this Pull Request title accurately reflects the intended release scope."
-
-  # =========================================================================
   # JOB 4: Semantic Release (RC on develop, Official Release on main)
   # =========================================================================
   semantic-release:
@@ -208,6 +186,12 @@ jobs:
 
       - name: Make Gradlew Executable
         run: chmod +x gradlew
+
+      - name: Build Compiled JAR Artifacts
+        env:
+          ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
+          ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
+        run: ./gradlew jar assemble
 
       - name: Install Semantic Release Dependencies
         run: |
