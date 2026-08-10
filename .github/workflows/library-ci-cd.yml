@@ -164,7 +164,6 @@ jobs:
       contents: write
       packages: write
       pull-requests: write
-      issues: write
       statuses: write
     steps:
       - name: Checkout Code
