@@ -35,6 +35,8 @@
     [
       "@semantic-release/github",
       {
+        "releasedLabels": false,
+        "addReleases": false,
         "assets": [
           {
             "path": "build/libs/*.jar",
