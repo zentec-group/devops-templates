@@ -165,6 +165,7 @@ jobs:
       contents: write
       packages: write
       pull-requests: write
+      issues: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
