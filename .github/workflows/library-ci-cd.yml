@@ -148,10 +148,29 @@ jobs:
           PR_NUM="${{ github.event.pull_request.number }}"
           REPO="${{ github.repository }}"
           SNAPSHOT_VERSION="1.0.0-PR${PR_NUM}-SNAPSHOT"
-          gh pr comment "$PR_NUM" --repo "$REPO" --body "**PR Snapshot Package Published**
+
+          MODULES=$(./gradlew projects --q | grep "Project ':" | sed "s/.*':\([^']*\)'.*/\1/" || true)
+
+          if [ -z "$MODULES" ]; then
+            BODY="**PR Snapshot Package Published**
 
           Artifact: \`com.zentec:${{ github.event.repository.name }}:${SNAPSHOT_VERSION}\`
           Repository: GitHub Packages (\`zentec-group\`)"
+          else
+            ARTIFACT_LIST=""
+            for mod in $MODULES; do
+              ARTIFACT_LIST="${ARTIFACT_LIST}\n- \`com.zentec:${mod}:${SNAPSHOT_VERSION}\` "
+            done
+
+            BODY="**PR Snapshot Packages Published**
+
+          Artifacts:
+          $(echo -e "$ARTIFACT_LIST")
+
+          Repository: GitHub Packages (\`zentec-group\`)"
+          fi
+
+          gh pr comment "$PR_NUM" --repo "$REPO" --body "$BODY"
 
   # =========================================================================
   # JOB 4: Semantic Release (RC on develop, Official Release on main)
