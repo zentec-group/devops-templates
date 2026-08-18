@@ -227,5 +227,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin develop
           git checkout develop
-          git merge origin/main --no-ff -m "chore(ci): auto-sync release from main to develop [skip ci]"
+          git merge origin/main --no-ff -X theirs -m "chore(ci): auto-sync release from main to develop [skip ci]"
           git push origin develop
