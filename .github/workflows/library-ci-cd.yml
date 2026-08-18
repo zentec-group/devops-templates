@@ -241,3 +241,23 @@ jobs:
           git checkout develop
           git merge origin/main --no-ff -X theirs -m "chore(ci): auto-sync release from main to develop [skip ci]"
           git push origin develop
+
+  # =========================================================================
+  # JOB 5: Cleanup PR Snapshots when Pull Request is Closed / Merged
+  # =========================================================================
+  cleanup-closed-pr:
+    name: Cleanup Closed PR Snapshots
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    permissions:
+      packages: write
+    steps:
+      - name: Delete ALL Snapshots for THIS Closed PR
+        uses: actions/delete-package-versions@v5
+        continue-on-error: true
+        with:
+          package-name: '${{ github.event.repository.name }}'
+          package-type: 'maven'
+          version-regex: '^.*-PR${{ github.event.pull_request.number }}-.*-SNAPSHOT$'
+          min-versions-to-keep: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
