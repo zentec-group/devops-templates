@@ -137,7 +137,7 @@ jobs:
           ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           PR_NUM="${{ github.event.pull_request.number }}"
-          SHORT_SHA="${GITHUB_SHA:~0,7}"
+          SHORT_SHA="${GITHUB_SHA:0:7}"
           SNAPSHOT_VERSION="1.0.0-PR${PR_NUM}-${SHORT_SHA}-SNAPSHOT"
           echo "Publishing Snapshot Version: ${SNAPSHOT_VERSION}"
           ./gradlew publish -Pversion="${SNAPSHOT_VERSION}"
@@ -158,7 +158,7 @@ jobs:
         run: |
           PR_NUM="${{ github.event.pull_request.number }}"
           REPO="${{ github.repository }}"
-          SHORT_SHA="${GITHUB_SHA:~0,7}"
+          SHORT_SHA="${GITHUB_SHA:0:7}"
           SNAPSHOT_VERSION="1.0.0-PR${PR_NUM}-${SHORT_SHA}-SNAPSHOT"
 
           MODULES=$(./gradlew projects --q | grep "Project ':" | sed "s/.*':\([^']*\)'.*/\1/" || true)
