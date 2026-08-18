@@ -217,3 +217,15 @@ jobs:
           ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
           ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+
+      - name: Sync Main Release back to Develop Branch
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin develop
+          git checkout develop
+          git merge origin/main --no-ff -m "chore(ci): auto-sync release from main to develop [skip ci]"
+          git push origin develop
