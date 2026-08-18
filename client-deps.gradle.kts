@@ -41,7 +41,7 @@ val currentBranch: String = System.getenv("GITHUB_REF_NAME")
 val dynamicZentecVersion: String = if (currentBranch == "main" || currentBranch == "master") {
     "latest.release"
 } else {
-    "latest.integration"
+    "+-rc.+"
 }
 
 // Expose zentecVersion property globally for client build.gradle.kts
