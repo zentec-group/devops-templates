@@ -137,9 +137,20 @@ jobs:
           ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           PR_NUM="${{ github.event.pull_request.number }}"
-          SNAPSHOT_VERSION="1.0.0-PR${PR_NUM}-SNAPSHOT"
+          SHORT_SHA="${GITHUB_SHA:~0,7}"
+          SNAPSHOT_VERSION="1.0.0-PR${PR_NUM}-${SHORT_SHA}-SNAPSHOT"
           echo "Publishing Snapshot Version: ${SNAPSHOT_VERSION}"
           ./gradlew publish -Pversion="${SNAPSHOT_VERSION}"
+
+      - name: Cleanup Old Snapshots for THIS PR only
+        uses: actions/delete-package-versions@v5
+        continue-on-error: true
+        with:
+          package-name: '${{ github.event.repository.name }}'
+          package-type: 'maven'
+          version-regex: '^.*-PR${{ github.event.pull_request.number }}-.*-SNAPSHOT$'
+          min-versions-to-keep: 2
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment Published Snapshot Version on PR
         env:
@@ -147,7 +158,8 @@ jobs:
         run: |
           PR_NUM="${{ github.event.pull_request.number }}"
           REPO="${{ github.repository }}"
-          SNAPSHOT_VERSION="1.0.0-PR${PR_NUM}-SNAPSHOT"
+          SHORT_SHA="${GITHUB_SHA:~0,7}"
+          SNAPSHOT_VERSION="1.0.0-PR${PR_NUM}-${SHORT_SHA}-SNAPSHOT"
 
           MODULES=$(./gradlew projects --q | grep "Project ':" | sed "s/.*':\([^']*\)'.*/\1/" || true)
 
