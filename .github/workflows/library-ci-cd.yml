@@ -253,13 +253,50 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     permissions:
       packages: write
+      contents: read
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Delete ALL Snapshots for THIS Closed PR
-        uses: actions/delete-package-versions@v5
-        continue-on-error: true
+        uses: actions/github-script@v7
         with:
-          package-name: '${{ github.event.repository.name }}'
-          package-type: 'maven'
-          version-regex: '^.*-PR${{ github.event.pull_request.number }}-.*-SNAPSHOT$'
-          min-versions-to-keep: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNum = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const regex = new RegExp(`^.*-PR${prNum}-.*-SNAPSHOT$`);
+
+            try {
+              const pkgs = await github.rest.packages.listPackagesForOrganization({
+                package_type: 'maven',
+                org: owner
+              });
+
+              for (const pkg of pkgs.data) {
+                try {
+                  const versions = await github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg({
+                    package_type: 'maven',
+                    package_name: pkg.name,
+                    org: owner
+                  });
+
+                  for (const ver of versions.data) {
+                    if (regex.test(ver.name)) {
+                      console.log(`Deleting version ${ver.name} from package ${pkg.name}`);
+                      await github.rest.packages.deletePackageVersionForOrg({
+                        package_type: 'maven',
+                        package_name: pkg.name,
+                        package_version_id: ver.id,
+                        org: owner
+                      });
+                    }
+                  }
+                } catch (e) {
+                  console.log(`Error processing package ${pkg.name}: ${e.message}`);
+                }
+              }
+            } catch (err) {
+              console.log(`Error listing org packages: ${err.message}`);
+            }
+
