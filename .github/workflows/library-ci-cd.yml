@@ -146,14 +146,50 @@ jobs:
           ./gradlew publish -Pversion="${SNAPSHOT_VERSION}"
 
       - name: Cleanup Old Snapshots for THIS PR only
-        uses: actions/delete-package-versions@v5
+        uses: actions/github-script@v7
         continue-on-error: true
         with:
-          package-name: '${{ github.event.repository.name }}'
-          package-type: 'maven'
-          version-regex: '^.*-PR${{ github.event.pull_request.number }}-.*-SNAPSHOT$'
-          min-versions-to-keep: 2
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNum = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const regex = new RegExp(`^.*-PR${prNum}-.*-SNAPSHOT$`);
+
+            try {
+              const pkgs = await github.rest.packages.listPackagesForOrganization({
+                package_type: 'maven',
+                org: owner
+              });
+
+              for (const pkg of pkgs.data) {
+                try {
+                  const versions = await github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg({
+                    package_type: 'maven',
+                    package_name: pkg.name,
+                    org: owner
+                  });
+
+                  const matching = versions.data.filter(v => regex.test(v.name));
+                  // Mantener las 2 mas recientes, borrar las mas viejas acumuladas en este PR
+                  if (matching.length > 2) {
+                    const toDelete = matching.slice(2);
+                    for (const ver of toDelete) {
+                      console.log(`Cleaning old PR snapshot version ${ver.name} from package ${pkg.name}`);
+                      await github.rest.packages.deletePackageVersionForOrg({
+                        package_type: 'maven',
+                        package_name: pkg.name,
+                        package_version_id: ver.id,
+                        org: owner
+                      });
+                    }
+                  }
+                } catch (e) {
+                  console.log(`Error checking package ${pkg.name}: ${e.message}`);
+                }
+              }
+            } catch (err) {
+              console.log(`Error listing org packages: ${err.message}`);
+            }
 
       - name: Comment Published Snapshot Version on PR
         env:
