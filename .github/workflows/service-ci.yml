@@ -1,0 +1,78 @@
+name: Reusable Service CI Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: 'Java JDK Version'
+        required: false
+        type: string
+        default: '21'
+      coverage-threshold:
+        description: 'Minimum overall coverage percentage (0-100)'
+        required: false
+        type: string
+        default: '0'
+    secrets:
+      ZENTEC_GPR_USER:
+        required: false
+      ZENTEC_GPR_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  # =========================================================================
+  # JOB 1: Build, Unit Testing & JaCoCo Code Coverage Verification
+  # =========================================================================
+  build-and-test:
+    name: Build, Test & JaCoCo Coverage
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up JDK ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java-version }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Make Gradlew Executable
+        run: chmod +x gradlew
+
+      - name: Resolve Coverage Threshold
+        id: threshold
+        run: echo "ratio=$(awk 'BEGIN { printf "%.2f", ${{ inputs.coverage-threshold }} / 100 }')" >> "$GITHUB_OUTPUT"
+
+      - name: Run Tests & JaCoCo Coverage Verification
+        env:
+          ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
+          ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
+        run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification --continue -Pcoverage.threshold=${{ steps.threshold.outputs.ratio }}
+
+      - name: Comment Coverage Report on PR
+        uses: madrapps/jacoco-report@v1.6.1
+        if: always() && github.event_name == 'pull_request' && github.event.action != 'closed'
+        with:
+          paths: |
+            ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+            ${{ github.workspace }}/**/build/reports/jacoco/**/*.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: ${{ inputs.coverage-threshold }}
+          min-coverage-changed-files: 0
+          title: "JaCoCo Code Coverage Report"
+          pass-emoji: "✅"
+          fail-emoji: "❌"
+          continue-on-error: false
