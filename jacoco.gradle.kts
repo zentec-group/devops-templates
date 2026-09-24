@@ -24,7 +24,6 @@ val exclusionList = listOf(
     "**/constants/**",
     "**/enum/**",
     "**/enums/**",
-    "**/support/**",
     "**/interceptor/**",
     "**/migration/**",
     "**/seeder/**",
