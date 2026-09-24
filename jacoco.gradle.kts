@@ -31,6 +31,25 @@ val exclusionList = listOf(
     "**/*Application*"
 )
 
+// Packages of the classes generated from .proto files, read from the generated sources
+// (<root>/<sourceSet>/<generator>/<package>) once compilation has produced them
+val generatedProtoPackages: Set<String> by lazy {
+    listOf("generated/sources/proto", "generated/source/proto")
+        .map { layout.buildDirectory.dir(it).get().asFile }
+        .filter { it.isDirectory }
+        .flatMap { root ->
+            root.walkTopDown()
+                .filter { it.isFile && (it.extension == "java" || it.extension == "kt") }
+                .map { it.parentFile.relativeTo(root).invariantSeparatorsPath.split("/").drop(2).joinToString("/") }
+                .toList()
+        }
+        .toSet()
+}
+
+val isGeneratedProtoClass = Spec<FileTreeElement> {
+    !it.isDirectory && it.relativePath.parent?.pathString in generatedProtoPackages
+}
+
 tasks.named<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.named("test"))
     reports {
@@ -41,6 +60,7 @@ tasks.named<JacocoReport>("jacocoTestReport") {
         files(classDirectories.files.map {
             fileTree(it) {
                 exclude(exclusionList)
+                exclude(isGeneratedProtoClass)
             }
         })
     )
@@ -52,6 +72,7 @@ tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
         files(classDirectories.files.map {
             fileTree(it) {
                 exclude(exclusionList)
+                exclude(isGeneratedProtoClass)
             }
         })
     )
