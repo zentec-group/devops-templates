@@ -18,6 +18,10 @@ on:
         required: false
       ZENTEC_GPR_TOKEN:
         required: false
+      BYTECODERS_GPR_USER:
+        required: false
+      BYTECODERS_GPR_TOKEN:
+        required: false
 
 permissions:
   contents: read
@@ -60,6 +64,8 @@ jobs:
         env:
           ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
           ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
+          BYTECODERS_GPR_USER: ${{ secrets.BYTECODERS_GPR_USER }}
+          BYTECODERS_GPR_TOKEN: ${{ secrets.BYTECODERS_GPR_TOKEN }}
         run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification --continue -Pcoverage.threshold=${{ steps.threshold.outputs.ratio }}
 
       - name: Check Measurable Coverage Data
