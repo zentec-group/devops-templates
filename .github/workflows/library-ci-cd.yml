@@ -11,7 +11,7 @@ on:
     secrets:
       ZENTEC_GPR_USER:
         required: false
-      ZENTEC_GPR_TOKEN:
+      GPR_TOKEN:
         required: false
 
 permissions:
@@ -88,7 +88,7 @@ jobs:
       - name: Run Tests & JaCoCo Coverage Verification
         env:
           ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
-          ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
+          ZENTEC_GPR_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
         run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification --continue
 
       - name: Comment Coverage Report on PR
@@ -137,7 +137,7 @@ jobs:
       - name: Publish Dynamic PR Snapshot Package
         env:
           ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
-          ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
+          ZENTEC_GPR_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           PR_NUM="${{ github.event.pull_request.number }}"
           SHORT_SHA="${GITHUB_SHA:0:7}"
@@ -220,7 +220,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
-          ZENTEC_GPR_TOKEN: ${{ secrets.ZENTEC_GPR_TOKEN || secrets.GITHUB_TOKEN }}
+          ZENTEC_GPR_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
         run: npx semantic-release
 
       - name: Sync Main Release back to Develop Branch
