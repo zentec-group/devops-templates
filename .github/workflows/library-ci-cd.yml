@@ -138,6 +138,8 @@ jobs:
         env:
           ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
           ZENTEC_GPR_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
+          ZENTEC_PUBLISH_USER: ${{ github.actor }}
+          ZENTEC_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUM="${{ github.event.pull_request.number }}"
           SHORT_SHA="${GITHUB_SHA:0:7}"
@@ -221,6 +223,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZENTEC_GPR_USER: ${{ secrets.ZENTEC_GPR_USER || github.actor }}
           ZENTEC_GPR_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
+          ZENTEC_PUBLISH_USER: ${{ github.actor }}
+          ZENTEC_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
 
       - name: Sync Main Release back to Develop Branch
