@@ -1,13 +1,15 @@
 apply(plugin = "maven-publish")
 
 // Dynamic credential resolution supporting both Zentec and legacy property naming conventions.
-val publishUser: String = project.findProperty("zentec.gpr.user") as String?
+val publishUser: String = System.getenv("ZENTEC_PUBLISH_USER")
+    ?: project.findProperty("zentec.gpr.user") as String?
     ?: System.getenv("ZENTEC_GPR_USER")
     ?: project.findProperty("gpr.user") as String?
     ?: System.getenv("GPR_USER")
     ?: "github-actions"
 
-val publishToken: String = project.findProperty("zentec.gpr.token") as String?
+val publishToken: String = System.getenv("ZENTEC_PUBLISH_TOKEN")
+    ?: project.findProperty("zentec.gpr.token") as String?
     ?: System.getenv("ZENTEC_GPR_TOKEN")
     ?: project.findProperty("gpr.token") as String?
     ?: System.getenv("GPR_TOKEN")
