@@ -26,7 +26,7 @@ jobs:
   # =========================================================================
   pr-title:
     name: Check PR Title (Semantic PR)
-    runs-on: ubuntu-latest
+    runs-on: codebuild-zentec-gha-runner-${{ github.run_id }}-${{ github.run_attempt }}-small
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     permissions:
       contents: read
@@ -62,7 +62,7 @@ jobs:
   # =========================================================================
   build-and-test:
     name: Build, Test & JaCoCo Coverage
-    runs-on: ubuntu-latest
+    runs-on: codebuild-zentec-gha-runner-${{ github.run_id }}-${{ github.run_attempt }}
     needs: pr-title
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     permissions:
@@ -111,7 +111,7 @@ jobs:
   # =========================================================================
   publish-snapshot:
     name: Publish PR Snapshot Package
-    runs-on: ubuntu-latest
+    runs-on: codebuild-zentec-gha-runner-${{ github.run_id }}-${{ github.run_attempt }}
     needs: build-and-test
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     permissions:
@@ -184,7 +184,7 @@ jobs:
   # =========================================================================
   semantic-release:
     name: Semantic Release (RC & Official Release)
-    runs-on: ubuntu-latest
+    runs-on: codebuild-zentec-gha-runner-${{ github.run_id }}-${{ github.run_attempt }}
     if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
     permissions:
       contents: write
@@ -244,7 +244,7 @@ jobs:
   # =========================================================================
   cleanup-closed-pr:
     name: Cleanup Closed PR Snapshots
-    runs-on: ubuntu-latest
+    runs-on: codebuild-zentec-gha-runner-${{ github.run_id }}-${{ github.run_attempt }}-small
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     permissions:
       packages: write

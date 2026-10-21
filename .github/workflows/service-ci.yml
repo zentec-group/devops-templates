@@ -34,7 +34,7 @@ jobs:
   # =========================================================================
   build-and-test:
     name: Build, Test & JaCoCo Coverage
-    runs-on: ubuntu-latest
+    runs-on: codebuild-zentec-gha-runner-${{ github.run_id }}-${{ github.run_attempt }}
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     permissions:
       contents: read
