@@ -89,6 +89,8 @@ jobs:
       - name: Set Up Android SDK
         if: steps.android.outputs.found == 'true'
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -149,6 +151,8 @@ jobs:
       - name: Set Up Android SDK
         if: steps.android.outputs.found == 'true'
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -240,6 +244,8 @@ jobs:
       - name: Set Up Android SDK
         if: steps.android.outputs.found == 'true'
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
