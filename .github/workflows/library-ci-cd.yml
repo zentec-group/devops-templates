@@ -79,8 +79,15 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ inputs.java-version }}
 
+      - name: Detect Android modules
+        id: android
+        run: |
+          if grep -rqE 'com\.android\.(library|application)' --include='*.gradle' --include='*.gradle.kts' --include='*.toml' --exclude-dir=.git .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set Up Android SDK
-        if: hashFiles('**/AndroidManifest.xml') != ''
+        if: steps.android.outputs.found == 'true'
         uses: android-actions/setup-android@v3
 
       - name: Setup Gradle
@@ -132,8 +139,15 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ inputs.java-version }}
 
+      - name: Detect Android modules
+        id: android
+        run: |
+          if grep -rqE 'com\.android\.(library|application)' --include='*.gradle' --include='*.gradle.kts' --include='*.toml' --exclude-dir=.git .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set Up Android SDK
-        if: hashFiles('**/AndroidManifest.xml') != ''
+        if: steps.android.outputs.found == 'true'
         uses: android-actions/setup-android@v3
 
       - name: Setup Gradle
@@ -216,8 +230,15 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ inputs.java-version }}
 
+      - name: Detect Android modules
+        id: android
+        run: |
+          if grep -rqE 'com\.android\.(library|application)' --include='*.gradle' --include='*.gradle.kts' --include='*.toml' --exclude-dir=.git .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set Up Android SDK
-        if: hashFiles('**/AndroidManifest.xml') != ''
+        if: steps.android.outputs.found == 'true'
         uses: android-actions/setup-android@v3
 
       - name: Setup Gradle
